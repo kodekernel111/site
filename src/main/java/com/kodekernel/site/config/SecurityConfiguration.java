@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import static com.kodekernel.site.entity.Role.ADMIN;
 import static com.kodekernel.site.entity.Role.WRITER;
@@ -25,18 +26,45 @@ public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/auth/**", "/error", "/actuator/**")
-                                .permitAll()
+                        req
+                                // Public endpoints
+                                .requestMatchers("/api/auth/**", "/error", "/actuator/**").permitAll()
+                                
+                                // Blog reading - public GET access only
+                                .requestMatchers(HttpMethod.GET, "/api/blogs/search").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/blogs/tag/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/blogs/author/{email}/stats").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/blogs/my-posts").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/blogs/{id}/edit").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/blogs").permitAll()
+                                
+                                // View tracking - public POST access
+                                .requestMatchers(HttpMethod.POST, "/api/blogs/{id}/view").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/blogs/{id}/like").permitAll()
+                                
+                                // Blog writing - requires WRITER role (handled by @PreAuthorize)
+                                .requestMatchers(HttpMethod.POST, "/api/blogs").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/blogs/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/blogs/**").authenticated()
+                                
+                                // Image upload - requires WRITER role (handled by @PreAuthorize)
+                                .requestMatchers("/api/upload/**").authenticated()
+                                
+                                // Admin and management
                                 .requestMatchers("/api/management/**").hasAnyRole(ADMIN.name(), WRITER.name())
                                 .requestMatchers("/api/admin/**").hasRole(ADMIN.name())
-                                .anyRequest()
-                                .authenticated()
+                                
+                                // Everything else requires authentication
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
