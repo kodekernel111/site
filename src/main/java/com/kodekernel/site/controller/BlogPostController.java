@@ -26,7 +26,7 @@ public class BlogPostController {
     private final BlogPostService blogPostService;
     
     @PostMapping
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<BlogPostDTO> createBlogPost(
             @Valid @RequestBody CreateBlogPostRequest request,
             Authentication authentication) {
@@ -36,7 +36,7 @@ public class BlogPostController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<BlogPostDTO> updateBlogPost(
             @PathVariable UUID id,
             @Valid @RequestBody CreateBlogPostRequest request,
@@ -55,7 +55,7 @@ public class BlogPostController {
     }
     
     @GetMapping("/my-posts")
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<List<BlogPostDTO>> getMyPosts(Authentication authentication) {
         String userEmail = authentication.getName();
         List<BlogPostDTO> posts = blogPostService.getMyPosts(userEmail);
@@ -69,7 +69,7 @@ public class BlogPostController {
     }
     
     @GetMapping("/{id}/edit")
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<BlogPostDTO> getPostForEdit(
             @PathVariable UUID id,
             Authentication authentication) {
@@ -79,7 +79,7 @@ public class BlogPostController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<Void> deleteBlogPost(
             @PathVariable UUID id,
             Authentication authentication) {

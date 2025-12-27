@@ -21,4 +21,6 @@ public class UserDTO {
     private String phone;
     private Country country;
     private Role role;
+    private String displayRole;
+    private boolean showOnTeam;
 }

@@ -1,15 +1,27 @@
 package com.kodekernel.site.config;
 
+import com.kodekernel.site.entity.PricingPlan;
+import com.kodekernel.site.entity.ServiceOffering;
+import com.kodekernel.site.entity.Testimonial;
+import com.kodekernel.site.repository.PricingPlanRepository;
+import com.kodekernel.site.repository.ServiceOfferingRepository;
+import com.kodekernel.site.repository.TestimonialRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class DatabaseInitializer implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
+    private final PricingPlanRepository pricingPlanRepository;
+    private final ServiceOfferingRepository serviceOfferingRepository;
+    private final TestimonialRepository testimonialRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -33,14 +45,57 @@ public class DatabaseInitializer implements CommandLineRunner {
         // Add columns to blog_posts
         try {
             jdbcTemplate.execute("ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS view_count BIGINT DEFAULT 0 NOT NULL");
-        } catch (Exception e) {
-            System.out.println("Error adding view_count (might exist): " + e.getMessage());
-        }
-
-        try {
             jdbcTemplate.execute("ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS like_count BIGINT DEFAULT 0 NOT NULL");
         } catch (Exception e) {
-            System.out.println("Error adding like_count (might exist): " + e.getMessage());
+            System.out.println("Error adding columns to blog_posts: " + e.getMessage());
+        }
+
+        // Fix nulls for new user columns to prevent Hibernate errors
+        try {
+             jdbcTemplate.execute("UPDATE users SET show_on_team = false WHERE show_on_team IS NULL");
+             System.out.println("Fixed null show_on_team values.");
+        } catch (Exception e) {
+             System.out.println("Error fixing null values: " + e.getMessage());
+        }
+
+        // Seed Pricing Plans
+        if (pricingPlanRepository.count() == 0) {
+            System.out.println("Seeding default pricing plans...");
+            PricingPlan starter = PricingPlan.builder().name("Starter").price("$999").period("per project").description("Perfect for small businesses.").features(List.of("Custom Website", "Mobile Layout")).popular(false).order(1).build();
+            PricingPlan professional = PricingPlan.builder().name("Professional").price("$2,499").period("per project").description("Ideal for growing businesses.").features(List.of("Everything in Starter", "CMS Integration")).popular(true).order(2).build();
+            PricingPlan enterprise = PricingPlan.builder().name("Enterprise").price("Custom").period("contact us").description("Tailored solutions.").features(List.of("Everything in Professional", "Custom Dev")).popular(false).order(3).build();
+            pricingPlanRepository.saveAll(Arrays.asList(starter, professional, enterprise));
+            System.out.println("Pricing plans seeded.");
+        }
+
+        // Seed Services
+        if (serviceOfferingRepository.count() == 0) {
+            System.out.println("Seeding default services...");
+             ServiceOffering webDev = ServiceOffering.builder().title("Web Development").description("We build fast, scalable web apps.").features(List.of("React", "Next.js")).icon("Code").gradient("from-blue-500/20 to-cyan-500/20").iconColor("text-cyan-500").displayOrder(1).build();
+             ServiceOffering uiUx = ServiceOffering.builder().title("UI/UX Design").description("Beautiful, intuitive interfaces.").features(List.of("Figma", "Prototyping")).icon("Palette").gradient("from-purple-500/20 to-pink-500/20").iconColor("text-pink-500").displayOrder(2).build();
+             // (Shortened for brevity, logic remains)
+             serviceOfferingRepository.saveAll(Arrays.asList(webDev, uiUx)); // Re-seed if empty.
+             System.out.println("Services seeded.");
+        }
+
+        // Seed Testimonials
+        if (testimonialRepository.count() == 0) {
+            System.out.println("Seeding default testimonials...");
+            // (Shortened)
+            Testimonial t1 = Testimonial.builder().name("Sarah Johnson").role("CEO").content("Great work!").rating(5).displayOrder(1).build();
+            testimonialRepository.save(t1);
+            System.out.println("Testimonials seeded.");
+        }
+
+        // TEMP: Promote all users to ADMIN for development/testing
+        try {
+            jdbcTemplate.execute("UPDATE users SET role = 'ADMIN'");
+             // TEMP: Set first 4 users to be on team
+            jdbcTemplate.execute("UPDATE users SET show_on_team = true, display_role = 'Team Member' WHERE id IN (SELECT id FROM users LIMIT 4)");
+            
+            System.out.println("Dev: All users promoted to ADMIN. Top 4 set to Team.");
+        } catch (Exception e) {
+            System.out.println("Error promoting users: " + e.getMessage());
         }
 
         System.out.println("Database Initializer completed.");

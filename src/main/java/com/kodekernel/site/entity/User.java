@@ -46,6 +46,13 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+    
+    @Column(name = "display_role")
+    private String displayRole;
+    
+    @Column(name = "show_on_team")
+    @Builder.Default
+    private boolean showOnTeam = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
