@@ -38,6 +38,18 @@ public class Comment {
     @EqualsAndHashCode.Exclude
     private BlogPost blogPost;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
+    private java.util.List<Comment> replies = new java.util.ArrayList<>();
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

@@ -29,7 +29,7 @@ public class CommentController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(commentService.addComment(postId, request.getContent(), principal.getName()));
+        return ResponseEntity.ok(commentService.addComment(postId, request.getContent(), principal.getName(), request.getParentId()));
     }
 
     @GetMapping("/post/{postId}")

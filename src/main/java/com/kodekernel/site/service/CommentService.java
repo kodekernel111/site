@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,17 +25,24 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CommentDTO addComment(UUID postId, String content, String userEmail) {
+    public CommentDTO addComment(UUID postId, String content, String userEmail, UUID parentId) {
         User author = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         BlogPost blogPost = blogPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Blog post not found"));
 
+        Comment parent = null;
+        if (parentId != null) {
+            parent = commentRepository.findById(parentId)
+                    .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+        }
+
         Comment comment = Comment.builder()
                 .content(content)
                 .author(author)
                 .blogPost(blogPost)
+                .parent(parent)
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
@@ -53,7 +61,7 @@ public class CommentService {
         }
         final UUID currentUserId = currentUser != null ? currentUser.getId() : null;
 
-        return commentRepository.findByBlogPostOrderByCreatedAtDesc(blogPost, pageable)
+        return commentRepository.findByBlogPostAndParentIsNullOrderByCreatedAtDesc(blogPost, pageable)
                 .map(comment -> convertToDTO(comment, currentUserId));
     }
 
@@ -90,6 +98,13 @@ public class CommentService {
                 .authorId(comment.getAuthor().getId())
                 .createdAt(comment.getCreatedAt())
                 .isOwner(currentUserId != null && currentUserId.equals(comment.getAuthor().getId()))
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                .replies(comment.getReplies() != null ? 
+                        comment.getReplies().stream()
+                            .map(reply -> convertToDTO(reply, currentUserId))
+                            .sorted((c1, c2) -> c1.getCreatedAt().compareTo(c2.getCreatedAt())) // Oldest replies first
+                            .collect(Collectors.toList()) 
+                        : null)
                 .build();
     }
 }

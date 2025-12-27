@@ -22,4 +22,6 @@ public class CommentDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
     private boolean isOwner; // To let frontend know if delete button should be shown
+    private UUID parentId;
+    private java.util.List<CommentDTO> replies;
 }
