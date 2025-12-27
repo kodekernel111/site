@@ -218,6 +218,8 @@ public class BlogPostService {
                 .authorId(blogPost.getAuthor().getId())
                 .authorName(blogPost.getAuthor().getFirstName() + " " + blogPost.getAuthor().getLastName())
                 .authorEmail(blogPost.getAuthor().getEmail())
+                .authorBio(blogPost.getAuthor().getBio())
+                .authorRoles(blogPost.getAuthor().getRoles())
                 .build();
     }
 }

@@ -20,7 +20,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var role = request.getRole() != null ? request.getRole() : Role.USER;
+        var role = request.getRole() != null ? request.getRole() : "USER";
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -28,7 +28,7 @@ public class AuthenticationService {
                 .phone(request.getPhone())
                 .country(request.getCountry())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(role)
+                .roles(java.util.Set.of(role))
                 .build();
         repository.save(user);
         
@@ -41,7 +41,8 @@ public class AuthenticationService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .country(user.getCountry())
-                .role(user.getRole())
+                .roles(user.getRoles())
+                .bio(user.getBio())
                 .build();
 
         return AuthenticationResponse.builder()
@@ -69,7 +70,7 @@ public class AuthenticationService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .country(user.getCountry())
-                .role(user.getRole())
+                .roles(user.getRoles())
                 .build();
 
         return AuthenticationResponse.builder()

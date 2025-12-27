@@ -42,13 +42,27 @@ public class UserController {
                 .collect(Collectors.toList()));
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<UserDTO> updateProfile(@RequestBody UserDTO update, java.security.Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setBio(update.getBio());
+        // User requested that only bio can be updated by the user themselves
+        // Other details require admin intervention or different process
+        // Do not update roles or showOnTeam here
+        
+        return ResponseEntity.ok(convertToDTO(userRepository.save(user)));
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserDTO update) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         
-        if (update.getRole() != null) user.setRole(update.getRole());
+        if (update.getRoles() != null) user.setRoles(update.getRoles());
         user.setDisplayRole(update.getDisplayRole());
+        user.setBio(update.getBio());
         user.setShowOnTeam(update.isShowOnTeam());
         
         return ResponseEntity.ok(convertToDTO(userRepository.save(user)));
@@ -62,8 +76,9 @@ public class UserController {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .country(user.getCountry())
-                .role(user.getRole())
+                .roles(user.getRoles())
                 .displayRole(user.getDisplayRole())
+                .bio(user.getBio())
                 .showOnTeam(user.isShowOnTeam())
                 .build();
     }

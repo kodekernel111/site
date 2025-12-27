@@ -18,5 +18,5 @@ public class RegisterRequest {
     private String phone;
     private com.kodekernel.site.entity.Country country;
     private String password;
-    private Role role; // Optional, defaults to USER if null
+    private String role; // Optional, defaults to USER if null
 }

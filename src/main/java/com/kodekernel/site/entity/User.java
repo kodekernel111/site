@@ -10,8 +10,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set; // Added import
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -44,8 +46,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password; // hashed
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    @Builder.Default
+    private Set<String> roles = new HashSet<>();
     
     @Column(name = "display_role")
     private String displayRole;
@@ -53,10 +58,15 @@ public class User implements UserDetails {
     @Column(name = "show_on_team")
     @Builder.Default
     private boolean showOnTeam = false;
+    
+    @Column(columnDefinition = "TEXT")
+    private String bio;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return roles.stream()
+                .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
+                .collect(Collectors.toSet());
     }
 
     @Override

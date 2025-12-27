@@ -25,7 +25,7 @@ public class ImageUploadController {
     private final S3Service s3Service;
 
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<?> uploadImage(
             @RequestParam("image") MultipartFile file,
             Authentication authentication) {
@@ -70,7 +70,7 @@ public class ImageUploadController {
     }
 
     @DeleteMapping("/image")
-    @PreAuthorize("hasRole('WRITER')")
+    @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<Void> deleteImage(@RequestParam("url") String imageUrl) {
         try {
             s3Service.deleteImage(imageUrl);

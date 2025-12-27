@@ -20,7 +20,8 @@ public class UserDTO {
     private String email;
     private String phone;
     private Country country;
-    private Role role;
+    private java.util.Set<String> roles;
     private String displayRole;
+    private String bio;
     private boolean showOnTeam;
 }

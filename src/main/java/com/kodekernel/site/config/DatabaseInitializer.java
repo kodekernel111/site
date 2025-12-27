@@ -22,6 +22,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final PricingPlanRepository pricingPlanRepository;
     private final ServiceOfferingRepository serviceOfferingRepository;
     private final TestimonialRepository testimonialRepository;
+    private final com.kodekernel.site.repository.SystemRoleRepository systemRoleRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -58,6 +59,14 @@ public class DatabaseInitializer implements CommandLineRunner {
              System.out.println("Error fixing null values: " + e.getMessage());
         }
 
+        // Seed System Roles
+        if (systemRoleRepository.count() == 0) {
+            systemRoleRepository.save(com.kodekernel.site.entity.SystemRole.builder().name("ADMIN").build());
+            systemRoleRepository.save(com.kodekernel.site.entity.SystemRole.builder().name("USER").build());
+            systemRoleRepository.save(com.kodekernel.site.entity.SystemRole.builder().name("WRITER").build());
+            System.out.println("Seeded system roles.");
+        }
+
         // Seed Pricing Plans
         if (pricingPlanRepository.count() == 0) {
             System.out.println("Seeding default pricing plans...");
@@ -89,7 +98,9 @@ public class DatabaseInitializer implements CommandLineRunner {
 
         // TEMP: Promote all users to ADMIN for development/testing
         try {
-            jdbcTemplate.execute("UPDATE users SET role = 'ADMIN'");
+            // Assign ADMIN role to all users in user_roles table
+            jdbcTemplate.execute("INSERT INTO user_roles (user_id, role) SELECT id, 'ADMIN' FROM users WHERE id NOT IN (SELECT user_id FROM user_roles WHERE role = 'ADMIN')");
+
              // TEMP: Set first 4 users to be on team
             jdbcTemplate.execute("UPDATE users SET show_on_team = true, display_role = 'Team Member' WHERE id IN (SELECT id FROM users LIMIT 4)");
             
