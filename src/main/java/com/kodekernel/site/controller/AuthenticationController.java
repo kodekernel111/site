@@ -31,4 +31,22 @@ public class AuthenticationController {
     ) {
         return ResponseEntity.ok(service.authenticate(request));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody com.kodekernel.site.dto.ForgotPasswordRequest request) {
+        service.forgotPassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody com.kodekernel.site.dto.ResetPasswordRequest request) {
+        service.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody com.kodekernel.site.dto.ChangePasswordRequest request) {
+        service.changePassword(request);
+        return ResponseEntity.ok().build();
+    }
 }

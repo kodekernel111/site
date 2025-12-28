@@ -64,6 +64,12 @@ public class User implements UserDetails {
 
     private String profilePic;
 
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    private java.time.LocalDateTime resetPasswordTokenExpiry;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()

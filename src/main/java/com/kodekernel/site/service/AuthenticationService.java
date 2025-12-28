@@ -81,4 +81,46 @@ public class AuthenticationService {
                 .user(userDTO)
                 .build();
     }
+    public void forgotPassword(ForgotPasswordRequest request) {
+        var userOptional = repository.findByEmail(request.getEmail());
+        if (userOptional.isEmpty()) {
+            return; // Silently fail for security
+        }
+        var user = userOptional.get();
+        String token = java.util.UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        repository.save(user); // Save to DB
+
+        // MOCK EMAIL SENDING
+        System.out.println("--------------------------------------------------");
+        System.out.println("PASSWORD RESET LINK FOR: " + user.getEmail());
+        System.out.println("http://localhost:5173/reset-password?token=" + token); 
+        System.out.println("--------------------------------------------------");
+    }
+
+    public void resetPassword(ResetPasswordRequest request) {
+        var user = repository.findByResetPasswordToken(request.getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset token"));
+
+        if (user.getResetPasswordTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("Token has expired");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        repository.save(user);
+    }
+    public void changePassword(ChangePasswordRequest request) {
+        var user = repository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        repository.save(user);
+    }
 }

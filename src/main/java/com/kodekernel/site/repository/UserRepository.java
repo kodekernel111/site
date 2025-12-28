@@ -12,4 +12,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))")
     java.util.List<User> searchUsers(@org.springframework.data.repository.query.Param("query") String query);
+
+    Optional<User> findByResetPasswordToken(String token);
 }
