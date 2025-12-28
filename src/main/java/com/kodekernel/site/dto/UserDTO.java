@@ -24,4 +24,5 @@ public class UserDTO {
     private String displayRole;
     private String bio;
     private boolean showOnTeam;
+    private String profilePic;
 }

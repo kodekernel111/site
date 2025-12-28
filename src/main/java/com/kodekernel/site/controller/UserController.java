@@ -48,6 +48,7 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         user.setBio(update.getBio());
+        user.setProfilePic(update.getProfilePic());
         // User requested that only bio can be updated by the user themselves
         // Other details require admin intervention or different process
         // Do not update roles or showOnTeam here
@@ -63,6 +64,7 @@ public class UserController {
         if (update.getRoles() != null) user.setRoles(update.getRoles());
         user.setDisplayRole(update.getDisplayRole());
         user.setBio(update.getBio());
+        user.setProfilePic(update.getProfilePic());
         user.setShowOnTeam(update.isShowOnTeam());
         
         return ResponseEntity.ok(convertToDTO(userRepository.save(user)));
@@ -80,6 +82,7 @@ public class UserController {
                 .displayRole(user.getDisplayRole())
                 .bio(user.getBio())
                 .showOnTeam(user.isShowOnTeam())
+                .profilePic(user.getProfilePic())
                 .build();
     }
 }

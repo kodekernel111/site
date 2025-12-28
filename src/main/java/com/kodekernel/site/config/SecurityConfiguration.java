@@ -48,6 +48,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.GET, "/api/blogs").permitAll()
                                 
                                 // Comments - public GET, others authenticated
+                                .requestMatchers(HttpMethod.POST, "/api/payment/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/config/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
                                 .requestMatchers("/api/comments/**").authenticated()
                                 
@@ -56,6 +58,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.GET, "/api/services/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/users/team").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                                 
                                 // View tracking - public POST access
                                 .requestMatchers(HttpMethod.POST, "/api/blogs/{id}/view").permitAll()

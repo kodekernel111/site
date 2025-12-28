@@ -96,6 +96,7 @@ public class CommentService {
                 .authorName(comment.getAuthor().getFirstName() + " " + comment.getAuthor().getLastName())
                 .authorInitials(initials)
                 .authorId(comment.getAuthor().getId())
+                .authorProfilePic(comment.getAuthor().getProfilePic())
                 .createdAt(comment.getCreatedAt())
                 .isOwner(currentUserId != null && currentUserId.equals(comment.getAuthor().getId()))
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)

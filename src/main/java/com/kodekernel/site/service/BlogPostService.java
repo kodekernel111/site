@@ -220,6 +220,7 @@ public class BlogPostService {
                 .authorEmail(blogPost.getAuthor().getEmail())
                 .authorBio(blogPost.getAuthor().getBio())
                 .authorRoles(blogPost.getAuthor().getRoles())
+                .authorProfilePic(blogPost.getAuthor().getProfilePic())
                 .build();
     }
 }
