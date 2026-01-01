@@ -43,11 +43,16 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable UUID commentId, Principal principal) {
+    public ResponseEntity<?> deleteComment(@PathVariable UUID commentId, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        commentService.deleteComment(commentId, principal.getName());
-        return ResponseEntity.noContent().build();
+        try {
+            commentService.deleteComment(commentId, principal.getName());
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 }

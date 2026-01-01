@@ -58,8 +58,22 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.GET, "/api/services/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/testimonials/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/users/team").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                                // Roles and Management
+                                .requestMatchers(HttpMethod.GET, "/api/roles").hasRole(ADMIN.name())
+                                .requestMatchers(HttpMethod.POST, "/api/roles").hasRole(ADMIN.name())
+                                .requestMatchers("/api/roles/**").hasRole(ADMIN.name())
                                 
+                                // Image upload - requires WRITER or ADMIN role
+                                .requestMatchers("/api/upload/**").hasAnyRole(ADMIN.name(), WRITER.name())
+                                
+                                // Products - Public GET, Admin others
+                                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
+                                .requestMatchers("/api/products", "/api/products/**").hasRole(ADMIN.name())
+
+                                // Categories
+                                .requestMatchers(HttpMethod.GET, "/api/product-categories", "/api/product-categories/**").permitAll()
+                                .requestMatchers("/api/product-categories", "/api/product-categories/**").hasRole(ADMIN.name())
+
                                 // View tracking - public POST access
                                 .requestMatchers(HttpMethod.POST, "/api/blogs/{id}/view").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/blogs/{id}/like").permitAll()
@@ -68,9 +82,6 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "/api/blogs").authenticated()
                                 .requestMatchers(HttpMethod.PUT, "/api/blogs/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/blogs/**").authenticated()
-                                
-                                // Image upload - requires WRITER role (handled by @PreAuthorize)
-                                .requestMatchers("/api/upload/**").authenticated()
                                 
                                 // Admin and management
                                 .requestMatchers("/api/management/**").hasAnyRole(ADMIN.name(), WRITER.name())

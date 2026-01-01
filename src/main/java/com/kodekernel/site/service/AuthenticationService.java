@@ -46,6 +46,7 @@ public class AuthenticationService {
                 .country(user.getCountry())
                 .roles(user.getRoles())
                 .bio(user.getBio())
+                .profilePic(user.getProfilePic())
                 .build();
 
         return AuthenticationResponse.builder()
@@ -74,6 +75,7 @@ public class AuthenticationService {
                 .phone(user.getPhone())
                 .country(user.getCountry())
                 .roles(user.getRoles())
+                .profilePic(user.getProfilePic())
                 .build();
 
         return AuthenticationResponse.builder()

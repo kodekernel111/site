@@ -73,12 +73,19 @@ public class CommentService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Only author or admin (if we had roles) can delete. For now just author.
-        if (!comment.getAuthor().getId().equals(user.getId())) {
-             throw new RuntimeException("Not authorized to delete this comment");
+        // Allow deletion if user is the author OR has ADMIN/WRITER role
+        boolean isModerator = user.getRoles().contains("ADMIN") || user.getRoles().contains("WRITER");
+        boolean isAuthor = comment.getAuthor().getId().equals(user.getId());
+
+        if (!isAuthor && !isModerator) {
+             throw new RuntimeException("Not authorized. User: " + user.getId() + ", Author: " + comment.getAuthor().getId() + ", Roles: " + user.getRoles());
         }
 
-        commentRepository.delete(comment);
+        try {
+            commentRepository.delete(comment);
+        } catch (Exception e) {
+            throw new RuntimeException("Database error during delete: " + e.getMessage());
+        }
     }
 
     private CommentDTO convertToDTO(Comment comment, UUID currentUserId) {

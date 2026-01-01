@@ -5,6 +5,7 @@ import com.kodekernel.site.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProductService {
@@ -19,11 +20,11 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public void deleteProduct(Long id) {
+    public void deleteProduct(UUID id) {
         productRepository.deleteById(id);
     }
     
-    public Product getProduct(Long id) {
+    public Product getProduct(UUID id) {
         return productRepository.findById(id).orElse(null);
     }
 }

@@ -23,6 +23,8 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final ServiceOfferingRepository serviceOfferingRepository;
     private final TestimonialRepository testimonialRepository;
     private final com.kodekernel.site.repository.SystemRoleRepository systemRoleRepository;
+    private final com.kodekernel.site.repository.ProductCategoryRepository productCategoryRepository;
+    private final com.kodekernel.site.repository.ProductRepository productRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -59,6 +61,16 @@ public class DatabaseInitializer implements CommandLineRunner {
              System.out.println("Error fixing null values: " + e.getMessage());
         }
 
+         // Ensure Product table has new columns
+         try {
+             jdbcTemplate.execute("ALTER TABLE product_registry ADD COLUMN IF NOT EXISTS show_delivery_badge BOOLEAN DEFAULT true NOT NULL");
+             jdbcTemplate.execute("ALTER TABLE product_registry ADD COLUMN IF NOT EXISTS beta_banner_enabled BOOLEAN DEFAULT false NOT NULL");
+             jdbcTemplate.execute("ALTER TABLE product_registry ADD COLUMN IF NOT EXISTS beta_banner_message TEXT");
+             System.out.println("Verified product_registry schema evolution.");
+         } catch (Exception e) {
+             System.out.println("Error evolving product_registry: " + e.getMessage());
+         }
+
         // Seed System Roles
         if (systemRoleRepository.count() == 0) {
             systemRoleRepository.save(com.kodekernel.site.entity.SystemRole.builder().name("ADMIN").build());
@@ -94,6 +106,36 @@ public class DatabaseInitializer implements CommandLineRunner {
             Testimonial t1 = Testimonial.builder().name("Sarah Johnson").role("CEO").content("Great work!").rating(5).displayOrder(1).build();
             testimonialRepository.save(t1);
             System.out.println("Testimonials seeded.");
+        }
+
+        // Seed Product Categories
+        if (productCategoryRepository.count() == 0) {
+            System.out.println("Seeding default product categories...");
+            productCategoryRepository.save(com.kodekernel.site.entity.ProductCategory.builder().name("SaaS").build());
+            productCategoryRepository.save(com.kodekernel.site.entity.ProductCategory.builder().name("Mobile App").build());
+            productCategoryRepository.save(com.kodekernel.site.entity.ProductCategory.builder().name("AI Services").build());
+            productCategoryRepository.save(com.kodekernel.site.entity.ProductCategory.builder().name("Full-Stack").build());
+            System.out.println("Product categories seeded.");
+        }
+
+        // Seed Default Product
+        if (productRepository.count() == 0) {
+            System.out.println("Seeding default store product...");
+            com.kodekernel.site.entity.ProductCategory saas = productCategoryRepository.findByName("SaaS").orElse(null);
+            if (saas != null) {
+                com.kodekernel.site.entity.Product p = new com.kodekernel.site.entity.Product();
+                p.setTitle("Modern SaaS Boilerplate");
+                p.setPrice("499");
+                p.setCategory(saas);
+                p.setDescription("A production-ready React + Spring Boot foundation.");
+                p.setLongDescription("Master architectural patterns with our elite SaaS starter kit.");
+                p.setTags(List.of("React", "Spring Boot", "PostgreSQL"));
+                p.setFeatures(List.of("Auth System", "Payment Ready", "Clean Arch"));
+                p.setButtonText("Buy Source Code");
+                p.setButtonLink("/contact");
+                productRepository.save(p);
+                System.out.println("Default store product seeded.");
+            }
         }
 
         // TEMP: Promote all users to ADMIN for development/testing

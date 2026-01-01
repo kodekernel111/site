@@ -24,6 +24,9 @@ public class ImageUploadController {
 
     private final S3Service s3Service;
 
+    private static final java.util.List<String> ALLOWED_CONTENT_TYPES = java.util.Arrays.asList(
+            "image/jpeg", "image/png", "image/webp", "image/gif");
+
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('WRITER', 'ADMIN')")
     public ResponseEntity<?> uploadImage(
@@ -32,6 +35,11 @@ public class ImageUploadController {
         
         try {
             log.info("Received image upload request from user: {}", authentication.getName());
+            
+            if (file.getContentType() == null || !ALLOWED_CONTENT_TYPES.contains(file.getContentType().toLowerCase())) {
+                throw new IllegalArgumentException("Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.");
+            }
+
             log.info("File details - Name: {}, Size: {}, Type: {}", 
                     file.getOriginalFilename(), file.getSize(), file.getContentType());
             
