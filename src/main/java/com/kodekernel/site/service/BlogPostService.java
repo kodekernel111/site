@@ -26,6 +26,7 @@ public class BlogPostService {
     
     private final BlogPostRepository blogPostRepository;
     private final UserRepository userRepository;
+    private final com.kodekernel.site.repository.BlogSeriesRepository blogSeriesRepository;
     
     @Transactional
     public BlogPostDTO createBlogPost(CreateBlogPostRequest request, String userEmail) {
@@ -40,8 +41,15 @@ public class BlogPostService {
                 .tags(request.getTags() != null ? request.getTags() : List.of())
                 .published(request.getPublished() != null ? request.getPublished() : false)
                 .editorMode(request.getEditorMode())
+                .editorMode(request.getEditorMode())
                 .author(author)
                 .build();
+        
+        if (request.getSeriesId() != null) {
+            com.kodekernel.site.entity.BlogSeries series = blogSeriesRepository.findById(request.getSeriesId())
+                    .orElseThrow(() -> new RuntimeException("Series not found"));
+            blogPost.setSeries(series);
+        }
         
         BlogPost savedPost = blogPostRepository.save(blogPost);
         return convertToDTO(savedPost);
@@ -63,7 +71,16 @@ public class BlogPostService {
         blogPost.setCoverImage(request.getCoverImage());
         blogPost.setTags(request.getTags() != null ? request.getTags() : List.of());
         blogPost.setPublished(request.getPublished() != null ? request.getPublished() : false);
+        blogPost.setPublished(request.getPublished() != null ? request.getPublished() : false);
         blogPost.setEditorMode(request.getEditorMode());
+        
+        if (request.getSeriesId() != null) {
+            com.kodekernel.site.entity.BlogSeries series = blogSeriesRepository.findById(request.getSeriesId())
+                    .orElseThrow(() -> new RuntimeException("Series not found"));
+            blogPost.setSeries(series);
+        } else {
+            blogPost.setSeries(null);
+        }
         
         BlogPost updatedPost = blogPostRepository.save(blogPost);
         return convertToDTO(updatedPost);
@@ -221,6 +238,16 @@ public class BlogPostService {
                 .authorBio(blogPost.getAuthor().getBio())
                 .authorRoles(blogPost.getAuthor().getRoles())
                 .authorProfilePic(blogPost.getAuthor().getProfilePic())
+                .seriesId(blogPost.getSeries() != null ? blogPost.getSeries().getId() : null)
+                .seriesName(blogPost.getSeries() != null ? blogPost.getSeries().getName() : null)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BlogPostDTO> getPostsBySeries(UUID seriesId) {
+        return blogPostRepository.findBySeriesIdAndPublishedTrue(seriesId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

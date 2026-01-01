@@ -79,6 +79,10 @@ public class BlogPost {
     @EqualsAndHashCode.Exclude
     private List<Comment> comments = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "series_id")
+    private BlogSeries series;
+
     @PrePersist
     @PreUpdate
     private void updatePublishedAt() {

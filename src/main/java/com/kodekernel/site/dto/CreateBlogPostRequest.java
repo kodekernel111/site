@@ -34,4 +34,6 @@ public class CreateBlogPostRequest {
     private Boolean published;
     
     private String editorMode;
+    
+    private java.util.UUID seriesId;
 }

@@ -37,4 +37,8 @@ public class BlogPostDTO {
     private String authorBio;
     private java.util.Set<String> authorRoles;
     private String authorProfilePic;
+    
+    // Series Info
+    private UUID seriesId;
+    private String seriesName;
 }

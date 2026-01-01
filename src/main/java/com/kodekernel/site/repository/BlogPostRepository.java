@@ -56,4 +56,6 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, UUID> {
     // Sum total likes for author's published posts
     @Query("SELECT COALESCE(SUM(b.likeCount), 0) FROM BlogPost b WHERE b.author = :author AND b.published = true")
     Long sumLikesByAuthor(@Param("author") User author);
+    
+    List<BlogPost> findBySeriesIdAndPublishedTrue(UUID seriesId);
 }

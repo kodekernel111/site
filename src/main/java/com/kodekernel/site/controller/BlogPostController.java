@@ -102,6 +102,12 @@ public class BlogPostController {
         List<BlogPostDTO> posts = blogPostService.getPostsByTag(tag);
         return ResponseEntity.ok(posts);
     }
+
+    @GetMapping("/series/{seriesId}")
+    public ResponseEntity<List<BlogPostDTO>> getPostsBySeries(@PathVariable UUID seriesId) {
+        List<BlogPostDTO> posts = blogPostService.getPostsBySeries(seriesId);
+        return ResponseEntity.ok(posts);
+    }
     
     @GetMapping("/author/{email}/stats")
     public ResponseEntity<AuthorStatsDTO> getAuthorStats(@PathVariable String email) {
