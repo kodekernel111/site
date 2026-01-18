@@ -41,7 +41,6 @@ public class BlogPostService {
                 .tags(request.getTags() != null ? request.getTags() : List.of())
                 .published(request.getPublished() != null ? request.getPublished() : false)
                 .editorMode(request.getEditorMode())
-                .editorMode(request.getEditorMode())
                 .author(author)
                 .build();
         
@@ -70,7 +69,6 @@ public class BlogPostService {
         blogPost.setContent(request.getContent());
         blogPost.setCoverImage(request.getCoverImage());
         blogPost.setTags(request.getTags() != null ? request.getTags() : List.of());
-        blogPost.setPublished(request.getPublished() != null ? request.getPublished() : false);
         blogPost.setPublished(request.getPublished() != null ? request.getPublished() : false);
         blogPost.setEditorMode(request.getEditorMode());
         
@@ -218,13 +216,33 @@ public class BlogPostService {
     }
     
     private BlogPostDTO convertToDTO(BlogPost blogPost) {
+        if (blogPost == null) return null;
+        
+        User author = blogPost.getAuthor();
+        String authorName = "Unknown";
+        String authorEmail = "";
+        String authorBio = "";
+        java.util.Set<String> authorRoles = java.util.Collections.emptySet();
+        String authorProfilePic = null;
+        UUID authorId = null;
+
+        if (author != null) {
+            authorId = author.getId();
+            authorName = (author.getFirstName() != null ? author.getFirstName() : "") + " " + 
+                        (author.getLastName() != null ? author.getLastName() : "");
+            authorEmail = author.getEmail();
+            authorBio = author.getBio();
+            authorRoles = author.getRoles() != null ? author.getRoles() : java.util.Collections.emptySet();
+            authorProfilePic = author.getProfilePic();
+        }
+
         return BlogPostDTO.builder()
                 .id(blogPost.getId())
                 .title(blogPost.getTitle())
                 .excerpt(blogPost.getExcerpt())
                 .content(blogPost.getContent())
                 .coverImage(blogPost.getCoverImage())
-                .tags(blogPost.getTags())
+                .tags(blogPost.getTags() != null ? blogPost.getTags() : java.util.Collections.emptyList())
                 .published(blogPost.getPublished())
                 .editorMode(blogPost.getEditorMode())
                 .createdAt(blogPost.getCreatedAt())
@@ -232,12 +250,12 @@ public class BlogPostService {
                 .publishedAt(blogPost.getPublishedAt())
                 .viewCount(blogPost.getViewCount() != null ? blogPost.getViewCount() : 0L)
                 .likeCount(blogPost.getLikeCount() != null ? blogPost.getLikeCount() : 0L)
-                .authorId(blogPost.getAuthor().getId())
-                .authorName(blogPost.getAuthor().getFirstName() + " " + blogPost.getAuthor().getLastName())
-                .authorEmail(blogPost.getAuthor().getEmail())
-                .authorBio(blogPost.getAuthor().getBio())
-                .authorRoles(blogPost.getAuthor().getRoles())
-                .authorProfilePic(blogPost.getAuthor().getProfilePic())
+                .authorId(authorId)
+                .authorName(authorName.trim())
+                .authorEmail(authorEmail)
+                .authorBio(authorBio)
+                .authorRoles(authorRoles)
+                .authorProfilePic(authorProfilePic)
                 .seriesId(blogPost.getSeries() != null ? blogPost.getSeries().getId() : null)
                 .seriesName(blogPost.getSeries() != null ? blogPost.getSeries().getName() : null)
                 .build();

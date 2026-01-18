@@ -39,7 +39,7 @@ public class BlogPost {
     @Column(length = 1000)
     private String coverImage;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "blog_tags", joinColumns = @JoinColumn(name = "blog_post_id"))
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();

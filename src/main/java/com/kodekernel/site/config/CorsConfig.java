@@ -17,10 +17,13 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Allow frontend origins
-        configuration.setAllowedOrigins(Arrays.asList(
+        // Allow frontend origins
+        configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "http://localhost:5174"
+                "http://localhost:5174",
+                "https://*.kodekernel.com",
+                "https://kodekernel.com"
         ));
         
         // Allow all HTTP methods
